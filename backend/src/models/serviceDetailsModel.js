@@ -7,7 +7,6 @@ const ServiceDetailsSchema = new mongoose.Schema(
     customerName: { type: String, required: true },
     customerDetails: { type: String, required: true },
     productDetails: { type: String, required: true },
-    fault: { type: String, default: "" },
     materialUsed: { type: String, required: true },
     quotation: { type: String, default: null },
     status: {
@@ -15,6 +14,7 @@ const ServiceDetailsSchema = new mongoose.Schema(
       enum: ["Pending", "Shipped", "Delivered"],
       default: "Pending",
     },
+    fault: { type: String, default: "" },
   },
   { timestamps: true }
 );
