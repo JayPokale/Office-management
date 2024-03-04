@@ -11,7 +11,7 @@ const PurchaseDetailsSchema = new mongoose.Schema(
     cost: { type: Number, default: 0 },
     status: {
       type: String,
-      enum: ["Pending", "Completed"],
+      enum: ["Pending", "Paid"],
       default: "Pending",
     },
   },

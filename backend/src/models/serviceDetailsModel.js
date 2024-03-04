@@ -11,7 +11,7 @@ const ServiceDetailsSchema = new mongoose.Schema(
     quotation: { type: String, required: true },
     status: {
       type: String,
-      enum: ["Pending", "Shipped", "Delivered"],
+      enum: ["Pending", "Delivered"],
       default: "Pending",
     },
     fault: { type: String },
