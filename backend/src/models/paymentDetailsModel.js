@@ -7,7 +7,7 @@ const PaymentDetailsSchema = new mongoose.Schema(
     customerName: { type: String, required: true },
     customerDetails: { type: String, required: true },
     billNo: { type: String, required: true },
-    quotationDetails: { type: String, default: null },
+    quotationDetails: { type: String, default: true },
     amountRemaining: { type: Number, default: 0 },
     status: {
       type: String,

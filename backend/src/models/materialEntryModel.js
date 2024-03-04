@@ -6,17 +6,17 @@ const MaterialEntrySchema = new mongoose.Schema(
     date: { type: Date, required: true },
     customerName: { type: String, required: true },
     productDetails: { type: String, required: true },
-    quotation: { type: String, default: "" },
+    quotation: { type: String, required: true },
     status: {
       type: String,
       enum: ["Pending", "Shipped", "Delivered"],
       default: "Pending",
     },
-    materialUsed: { type: String },
+    spare: { type: String },
     chalanNumber: { type: String, required: true },
-    dispatchDetails: { type: String, default: "" },
-    fault: { type: String, default: "" },
-    photo: { type: String },
+    dispatchDetails: { type: String, required: true },
+    fault: { type: String },
+    photo: { type: String, required: true },
   },
   { timestamps: true }
 );
