@@ -12,9 +12,11 @@ const MaterialEntrySchema = new mongoose.Schema(
       enum: ["Pending", "Shipped", "Delivered"],
       default: "Pending",
     },
+    materialUsed: { type: String },
     chalanNumber: { type: String, required: true },
     dispatchDetails: { type: String, default: "" },
     fault: { type: String, default: "" },
+    photo: { type: String },
   },
   { timestamps: true }
 );
