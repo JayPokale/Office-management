@@ -1,19 +1,13 @@
 const PaymentDetails = require("../models/paymentDetailsModel");
-const { PaymentDetailsSchema } = require("../models/paymentDetailsModel");
-
-const validate = (req, res, next) => {
-  try {
-    PaymentDetailsSchema.parse(req.body);
-    next();
-  } catch (error) {
-    res.status(400).json({ error: "Invalid request data" });
-  }
-};
 
 const create = async (req, res) => {
+  const { body } = req;
+
   try {
-    const paymentDetails = new PaymentDetails(req.body);
+    const paymentDetails = new PaymentDetails(body);
+    await paymentDetails.validate();
     await paymentDetails.save();
+
     res.status(201).json(paymentDetails);
   } catch (error) {
     res.status(400).json({ error: "Invalid request data" });
@@ -22,8 +16,21 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const paymentDetailsList = await PaymentDetails.find();
-    res.status(200).json(paymentDetailsList);
+    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', amount } = req.query;
+
+    const query = {};
+    if (amount) {
+      query.amount = amount;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const paymentDetails = await PaymentDetails.find(query)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ [sortBy]: sortOrder });
+
+    res.status(200).json(paymentDetails);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -42,15 +49,19 @@ const getById = async (req, res) => {
 };
 
 const update = async (req, res) => {
+  const { body } = req;
+
   try {
     const paymentDetails = await PaymentDetails.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      body,
       { new: true, runValidators: true }
     );
+
     if (!paymentDetails) {
       return res.status(404).json({ error: "Payment Details not found" });
     }
+
     res.status(200).json(paymentDetails);
   } catch (error) {
     res.status(400).json({ error: "Invalid request data" });
@@ -72,7 +83,6 @@ const remove = async (req, res) => {
 };
 
 module.exports = {
-  validate,
   create,
   getAll,
   getById,

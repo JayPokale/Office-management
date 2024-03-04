@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const {
-  validate,
   create,
   getAll,
   getById,
@@ -9,10 +8,10 @@ const {
   remove,
 } = require("../controllers/purchaseDetailsController");
 
-router.post("/", validate, create);
+router.post("/", create);
 router.get("/", getAll);
 router.get("/:id", getById);
-router.put("/:id", validate, update);
+router.put("/:id", update);
 router.delete("/:id", remove);
 
 module.exports = router;

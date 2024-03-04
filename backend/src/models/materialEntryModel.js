@@ -1,23 +1,24 @@
-const { z } = require("zod");
 const mongoose = require("mongoose");
 
-const MaterialEntrySchema = z.object({
-  userId: z.string(),
-  date: z.date(),
-  customerName: z.string(),
-  productDetails: z.string(),
-  quotation: z.string().optional(),
-  status: z.enum(["Pending", "Shipped", "Delivered"]).default("Pending"),
-  chalanNumber: z.string(),
-  dispatchDetails: z.string().optional(),
-  fault: z.string().default(""),
-});
+const MaterialEntrySchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true },
+    date: { type: Date, required: true },
+    customerName: { type: String, required: true },
+    productDetails: { type: String, required: true },
+    quotation: { type: String, default: "" },
+    status: {
+      type: String,
+      enum: ["Pending", "Shipped", "Delivered"],
+      default: "Pending",
+    },
+    chalanNumber: { type: String, required: true },
+    dispatchDetails: { type: String, default: "" },
+    fault: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
 
-const materialEntrySchema = new mongoose.Schema(MaterialEntrySchema.shape, {
-  timestamps: true,
-});
-
-const MaterialEntry = mongoose.model("MaterialEntry", materialEntrySchema);
+const MaterialEntry = mongoose.model("MaterialEntry", MaterialEntrySchema);
 
 module.exports = MaterialEntry;
-module.exports.MaterialEntrySchema = MaterialEntrySchema;

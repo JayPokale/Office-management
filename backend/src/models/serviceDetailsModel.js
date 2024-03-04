@@ -1,23 +1,24 @@
-const { z } = require("zod");
 const mongoose = require("mongoose");
 
-const ServiceDetailsSchema = z.object({
-  userId: z.string(),
-  date: z.date(),
-  customerName: z.string(),
-  customerDetails: z.string(),
-  productDetails: z.string(),
-  fault: z.string().default(""),
-  materialUsed: z.string(),
-  quotation: z.string().nullable(),
-  status: z.enum(["Pending", "Shipped", "Delivered"]).default("Pending"),
-});
+const ServiceDetailsSchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true },
+    date: { type: Date, required: true },
+    customerName: { type: String, required: true },
+    customerDetails: { type: String, required: true },
+    productDetails: { type: String, required: true },
+    fault: { type: String, default: "" },
+    materialUsed: { type: String, required: true },
+    quotation: { type: String, default: null },
+    status: {
+      type: String,
+      enum: ["Pending", "Shipped", "Delivered"],
+      default: "Pending",
+    },
+  },
+  { timestamps: true }
+);
 
-const serviceDetailsSchema = new mongoose.Schema(ServiceDetailsSchema.shape, {
-  timestamps: true,
-});
-
-const ServiceDetails = mongoose.model("ServiceDetails", serviceDetailsSchema);
+const ServiceDetails = mongoose.model("ServiceDetails", ServiceDetailsSchema);
 
 module.exports = ServiceDetails;
-module.exports.ServiceDetailsSchema = ServiceDetailsSchema;

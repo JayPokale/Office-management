@@ -1,19 +1,13 @@
 const PurchaseDetails = require("../models/purchaseDetailsModel");
-const { PurchaseDetailsSchema } = require("../models/purchaseDetailsModel");
-
-const validate = (req, res, next) => {
-  try {
-    PurchaseDetailsSchema.parse(req.body);
-    next();
-  } catch (error) {
-    res.status(400).json({ error: "Invalid request data" });
-  }
-};
 
 const create = async (req, res) => {
+  const { body } = req;
+
   try {
-    const purchaseDetails = new PurchaseDetails(req.body);
+    const purchaseDetails = new PurchaseDetails(body);
+    await purchaseDetails.validate();
     await purchaseDetails.save();
+
     res.status(201).json(purchaseDetails);
   } catch (error) {
     res.status(400).json({ error: "Invalid request data" });
@@ -22,8 +16,27 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const purchaseDetailsList = await PurchaseDetails.find();
-    res.status(200).json(purchaseDetailsList);
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      productDetails,
+    } = req.query;
+
+    const query = {};
+    if (productDetails) {
+      query.productDetails = productDetails;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const purchaseDetails = await PurchaseDetails.find(query)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ [sortBy]: sortOrder });
+
+    res.status(200).json(purchaseDetails);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -42,15 +55,19 @@ const getById = async (req, res) => {
 };
 
 const update = async (req, res) => {
+  const { body } = req;
+
   try {
     const purchaseDetails = await PurchaseDetails.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      body,
       { new: true, runValidators: true }
     );
+
     if (!purchaseDetails) {
       return res.status(404).json({ error: "Purchase Details not found" });
     }
+
     res.status(200).json(purchaseDetails);
   } catch (error) {
     res.status(400).json({ error: "Invalid request data" });
@@ -72,7 +89,6 @@ const remove = async (req, res) => {
 };
 
 module.exports = {
-  validate,
   create,
   getAll,
   getById,

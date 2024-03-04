@@ -1,22 +1,23 @@
 const mongoose = require("mongoose");
-const { z } = require("zod");
 
-const PaymentDetailsSchema = z.object({
-  userId: z.string(),
-  date: z.date(),
-  customerName: z.string(),
-  customerDetails: z.string(),
-  billNo: z.string(),
-  quotationDetails: z.string().nullable(),
-  amountRemaining: z.number().default(0),
-  status: z.enum(["Pending", "Paid"]).default("Pending"),
-});
+const PaymentDetailsSchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true },
+    date: { type: Date, required: true },
+    customerName: { type: String, required: true },
+    customerDetails: { type: String, required: true },
+    billNo: { type: String, required: true },
+    quotationDetails: { type: String, default: null },
+    amountRemaining: { type: Number, default: 0 },
+    status: {
+      type: String,
+      enum: ["Pending", "Paid"],
+      default: "Pending",
+    },
+  },
+  { timestamps: true }
+);
 
-const paymentDetailsSchema = new mongoose.Schema(PaymentDetailsSchema.shape, {
-  timestamps: true,
-});
-
-const PaymentDetails = mongoose.model("PaymentDetails", paymentDetailsSchema);
+const PaymentDetails = mongoose.model("PaymentDetails", PaymentDetailsSchema);
 
 module.exports = PaymentDetails;
-module.exports.PaymentDetailsSchema = PaymentDetailsSchema;
