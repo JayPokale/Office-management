@@ -5,6 +5,7 @@ const PurchaseDetailsSchema = new mongoose.Schema(
     userId: { type: String, required: true },
     date: { type: Date, required: true },
     customerName: { type: String, required: true },
+    companyDetails: { type: String},
     productDetails: { type: String, required: true },
     materialUsed: { type: String, required: true },
     chalanNumber: { type: String, required: true },

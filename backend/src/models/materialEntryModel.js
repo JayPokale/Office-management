@@ -15,6 +15,7 @@ const MaterialEntrySchema = new mongoose.Schema(
     spare: { type: String },
     chalanNumber: { type: String, required: true },
     dispatchDetails: { type: String, required: true },
+    companyDetails: { type: String},
     fault: { type: String },
     photo: { type: String, required: true },
   },
