@@ -1,7 +1,13 @@
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 
 const RootLayoutNav = () => {
-  return <Slot />;
+  return (
+    <Stack
+      screenOptions={() => ({
+        headerTitle: "Company Name",
+      })}
+    />
+  );
 };
 
 export default RootLayoutNav;
