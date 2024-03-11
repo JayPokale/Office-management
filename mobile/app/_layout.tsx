@@ -5,6 +5,7 @@ const RootLayoutNav = () => {
     <Stack
       screenOptions={() => ({
         headerTitle: "Company Name",
+        contentStyle: {backgroundColor: "#ffffff"}
       })}
     />
   );

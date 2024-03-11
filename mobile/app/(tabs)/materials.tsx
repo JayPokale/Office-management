@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import axios from "axios";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 interface MaterialEntry {
   _id: string;
@@ -100,7 +101,15 @@ const MaterialEntryList: React.FC<{}> = () => {
   };
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <View style={{ padding: 10 }}>
+        <Link href="/" style={styles.addButtom}>
+          <Text style={{ color: "#007bff", alignItems: "center", display: "flex" }}>
+            <Ionicons name="archive-outline" size={24} color={"#007bff"} /> Add
+            Material
+          </Text>
+        </Link>
+      </View>
       {entries.length > 0 ? (
         entries.map((entry) => (
           <View key={entry._id}>
@@ -135,12 +144,22 @@ const MaterialEntryList: React.FC<{}> = () => {
 };
 
 const styles = StyleSheet.create({
+  addButtom: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#e0ffff",
+    borderStyle: "dashed",
+    borderColor: "lightblue",
+    borderWidth: 2,
+    borderRadius: 10,
+  },
   listItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 10,
-    position: "relative",
   },
   listItemText: {
     fontSize: 16,

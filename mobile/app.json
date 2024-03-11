@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "scheme": "myapp",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#ffffff",
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"

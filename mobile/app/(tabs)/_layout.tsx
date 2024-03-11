@@ -6,7 +6,7 @@ const _layout = () => {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: "#f5f5f5",
+          backgroundColor: "#fff",
           borderTopWidth: 1,
           borderTopColor: "#ddd",
         },
