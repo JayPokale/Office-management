@@ -103,8 +103,10 @@ const MaterialEntryList: React.FC<{}> = () => {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={{ padding: 10 }}>
-        <Link href="/" style={styles.addButtom}>
-          <Text style={{ color: "#007bff", alignItems: "center", display: "flex" }}>
+        <Link href="/material/" style={styles.addButtom}>
+          <Text
+            style={{ color: "#007bff", alignItems: "center", display: "flex" }}
+          >
             <Ionicons name="archive-outline" size={24} color={"#007bff"} /> Add
             Material
           </Text>
