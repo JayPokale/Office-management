@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uploadImage from "@/app/utils/uploadImage";
@@ -58,12 +59,10 @@ const AddMaterialEntry = () => {
     });
 
     if (!result.canceled) {
-      const { uri, base64 } = result.assets[0];
+      const { uri } = result.assets[0];
       setPhoto(uri);
-      // const fileType = uri.split(".").pop();
-      // const file = `data:${fileType};base64,${base64}`;
-      // const secureURI = await uploadImage(file);
-      // setPhoto(secureURI);
+      const secureURI = await uploadImage(uri);
+      setPhoto(secureURI);
     }
   }
 
@@ -125,7 +124,11 @@ const AddMaterialEntry = () => {
         onPress={pickPhotoAndUpload}
         style={styles.uploadButton}
       >
-        <Text style={styles.uploadButtonText}>Upload Photo</Text>
+        {photo ? (
+          <Image source={{ uri: photo }} style={styles.uploadPhoto} />
+        ) : (
+          <Text style={styles.uploadButtonText}>Upload Photo</Text>
+        )}
       </TouchableOpacity>
       <View style={styles.radioContainerWrapper}>
         {statuses.map((statusText: string) => (
@@ -171,7 +174,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   radioButtonTextSelected: {
-    color: "blue", // Adjust color as needed
+    color: "blue",
   },
   radioContainerWrapper: {
     flexDirection: "row",
@@ -187,6 +190,12 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     color: "#333",
     fontSize: 16,
+  },
+  uploadPhoto: {
+    width: "100%",
+    aspectRatio: 3 / 4,
+    resizeMode: "cover",
+    borderRadius: 5,
   },
 });
 
