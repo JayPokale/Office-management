@@ -16,27 +16,23 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = "createdAt",
-      sortOrder = "desc",
-      status,
-    } = req.query;
+    const { skip = 0, status } = req.query;
 
     const query = {};
     if (status) {
       query.status = status;
     }
 
-    const skip = (page - 1) * limit;
-
     const materialEntries = await MaterialEntry.find(query)
       .skip(skip)
-      .limit(parseInt(limit))
-      .sort({ [sortBy]: sortOrder });
+      .limit(11);
 
-    res.status(200).json(materialEntries);
+    const hasMoreEntries = materialEntries.length === 11;
+
+    res.status(200).json({
+      entries: materialEntries.slice(0, 10),
+      hasMoreEntries,
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

@@ -7,6 +7,7 @@ const ServiceDetailsSchema = new mongoose.Schema(
     customerName: { type: String, required: true },
     customerDetails: { type: String, required: true },
     companyDetails: { type: String },
+    companyName: { type: String },
     productDetails: { type: String, required: true },
     materialUsed: { type: String },
     quotation: { type: String, required: true },
