@@ -129,7 +129,7 @@ const MaterialEntryList: React.FC<{}> = () => {
                       {entry.status}
                     </Text>
                     <Text style={styles.listItemText}>
-                      {entry.date.toLocaleDateString("en-gb")}
+                      {entry.date.toLocaleDateString("en-gb").replaceAll("/", "-")}
                     </Text>
                   </View>
                   <Text style={styles.listItemText}>{entry.chalanNumber}</Text>

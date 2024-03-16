@@ -27,8 +27,8 @@ app.use((err, req, res, next) => {
 });
 
 connectDB();
-// app.use("/api/v1", checkAuth);
-app.use("/api/v1", routes);
+// app.use("/api/v0", checkAuth);
+app.use("/api/v0", routes);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

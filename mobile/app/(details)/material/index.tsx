@@ -11,6 +11,10 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uploadImage from "@/app/utils/uploadImage";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import axios from "axios";
 
 interface InputProps {
   placeholder: string;
@@ -39,17 +43,30 @@ const AddMaterialEntry = () => {
   const [companyName, setCompanyName] = useState("");
   const [productDetails, setProductDetails] = useState("");
   const [quotation, setQuotation] = useState("");
-  const [status, setStatus] = useState<string>("Pending"); // Set default status
+  const [status, setStatus] = useState<string>("Pending");
   const [spare, setSpare] = useState("");
   const [chalanNumber, setChalanNumber] = useState("");
   const [dispatchDetails, setDispatchDetails] = useState("");
   const [companyDetails, setCompanyDetails] = useState("");
   const [fault, setFault] = useState("");
+  const [offlinePhoto, setOfflinePhoto] = useState("");
   const [photo, setPhoto] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const statuses = ["Pending", "Shipped", "Delivered"]; // Available status options
+  const statuses = ["Pending", "Shipped", "Delivered"];
 
-  async function pickPhotoAndUpload() {
+  const handleDateChange = (
+    event: DateTimePickerEvent,
+    date?: Date | undefined
+  ) => {
+    setSelectedDate(date || new Date());
+    setShowDatePicker(false);
+  };
+
+  const pickPhotoAndUpload = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -60,11 +77,49 @@ const AddMaterialEntry = () => {
 
     if (!result.canceled) {
       const { uri } = result.assets[0];
-      setPhoto(uri);
+      setOfflinePhoto(uri);
       const secureURI = await uploadImage(uri);
       setPhoto(secureURI);
     }
-  }
+  };
+
+  const handleSave = async () => {
+    const data = {
+      userId: "123",
+      customerName,
+      companyName,
+      productDetails,
+      quotation,
+      status,
+      spare,
+      chalanNumber,
+      dispatchDetails,
+      companyDetails,
+      fault,
+      photo,
+      date: selectedDate,
+    };
+
+    try {
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Material entry saved successfully!");
+      } else {
+        console.error("Error saving material entry:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error saving material entry:", error);
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -121,11 +176,27 @@ const AddMaterialEntry = () => {
         multiline
       />
       <TouchableOpacity
+        onPress={() => setShowDatePicker(true)}
+        style={styles.datePickerButton}
+      >
+        <Text>
+          {selectedDate!.toLocaleDateString("en-gb").replaceAll("/", "-")}
+        </Text>
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate!}
+          mode="date"
+          display="spinner"
+          onChange={handleDateChange}
+        />
+      )}
+      <TouchableOpacity
         onPress={pickPhotoAndUpload}
         style={styles.uploadButton}
       >
-        {photo ? (
-          <Image source={{ uri: photo }} style={styles.uploadPhoto} />
+        {offlinePhoto ? (
+          <Image source={{ uri: offlinePhoto }} style={styles.uploadPhoto} />
         ) : (
           <Text style={styles.uploadButtonText}>Upload Photo</Text>
         )}
@@ -147,7 +218,7 @@ const AddMaterialEntry = () => {
           </TouchableOpacity>
         ))}
       </View>
-      <Button title="Save" onPress={() => {}} />
+      <Button title="Save" onPress={handleSave} />
     </ScrollView>
   );
 };
@@ -196,6 +267,13 @@ const styles = StyleSheet.create({
     aspectRatio: 3 / 4,
     resizeMode: "cover",
     borderRadius: 5,
+  },
+  datePickerButton: {
+    paddingVertical: 10,
+    marginBottom: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
+    alignItems: "center",
   },
 });
 
