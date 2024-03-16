@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Button,
+  ScrollView,
+} from "react-native";
 import axios from "axios";
 import { Link, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 interface MaterialEntry {
   _id: string;
   userId: string;
-  date: Date;
+  date: string;
   customerName: string;
   companyName: string;
   productDetails: string;
@@ -23,62 +30,23 @@ interface MaterialEntry {
 
 const MaterialEntryList: React.FC<{}> = () => {
   const [entries, setEntries] = useState<MaterialEntry[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(false);
 
+  const fetchData = async (skip: number = 0) => {
+    return await axios.get(
+      `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry?skip=${skip}`
+    );
+  };
+  
   const fetchEntries = async () => {
-    setEntries([
-      {
-        _id: "1",
-        userId: "user123",
-        date: new Date("2022-01-01"),
-        customerName: "John Doe",
-        companyName: "XYZ",
-        productDetails: "Product XYZ",
-        quotation: "Q123",
-        status: "Pending",
-        spare: "Spare123",
-        chalanNumber: "CN456",
-        dispatchDetails: "Dispatched on time",
-        companyDetails: "ABC Company",
-        fault: "No fault reported",
-        photo: "https://example.com/photo1.jpg",
-      },
-      {
-        _id: "2",
-        userId: "user456",
-        date: new Date("2022-02-15"),
-        customerName: "Jane Smith",
-        companyName: "XYZ",
-        productDetails: "Product ABC",
-        quotation: "Q789",
-        status: "Shipped",
-        chalanNumber: "CN789",
-        dispatchDetails: "In transit",
-        photo: "https://example.com/photo2.jpg",
-      },
-      {
-        _id: "3",
-        userId: "user789",
-        date: new Date("2022-03-10"),
-        customerName: "Bob Johnson",
-        companyName: "XYZ",
-        productDetails: "Product LMN",
-        quotation: "Q456",
-        status: "Delivered",
-        chalanNumber: "CN123",
-        dispatchDetails: "Successfully delivered",
-        companyDetails: "XYZ Corporation",
-        fault: "Minor issue reported",
-        photo: "https://example.com/photo3.jpg",
-      },
-      // Add more entries as needed
-    ]);
-    // try {
-    //   const response = await axios.get('https://your-api-endpoint.com/entries'); // Replace with your API endpoint
-    //   setEntries(response.data);
-    // } catch (error) {
-    //   console.error(error);
-    //   // Handle errors appropriately, e.g., display an error message
-    // }
+    try {
+      const response = await fetchData(entries.length);
+      setEntries((prev) => [...prev, ...response.data.entries]);
+      setHasMore(response.data.hasMoreEntries);
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -100,8 +68,12 @@ const MaterialEntryList: React.FC<{}> = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return dateString.split("T")[0].split("-").reverse().join("-");
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={{ padding: 10 }}>
         <Link href="/material/" style={styles.addButtom}>
           <Text
@@ -129,7 +101,7 @@ const MaterialEntryList: React.FC<{}> = () => {
                       {entry.status}
                     </Text>
                     <Text style={styles.listItemText}>
-                      {entry.date.toLocaleDateString("en-gb").replaceAll("/", "-")}
+                      {formatDate(entry.date)}
                     </Text>
                   </View>
                   <Text style={styles.listItemText}>{entry.chalanNumber}</Text>
@@ -141,7 +113,8 @@ const MaterialEntryList: React.FC<{}> = () => {
       ) : (
         <Text>Loading entries...</Text>
       )}
-    </View>
+      {hasMore && <Button title="Load More" onPress={fetchEntries} />}
+    </ScrollView>
   );
 };
 
