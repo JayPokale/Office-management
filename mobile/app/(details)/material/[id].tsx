@@ -8,6 +8,7 @@ import {
   Image,
   Dimensions,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 
 interface MaterialEntry {
@@ -99,6 +100,9 @@ const MaterialEntryDetails = () => {
           <View style={styles.imageContainer}>
             <Image source={{ uri: entry.photo }} style={styles.image} />
           </View>
+          <TouchableOpacity style={styles.editButton} onPress={() => {}}>
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
         </>
       ) : (
         <Text>Loading details...</Text>
@@ -137,6 +141,18 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     aspectRatio: 3 / 4,
+  },
+  editButton: {
+    backgroundColor: "#007bff",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    alignItems: "center",
+  },
+  editButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
 

@@ -15,6 +15,7 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
+import { useRouter } from "expo-router";
 
 interface InputProps {
   placeholder: string;
@@ -55,6 +56,7 @@ const AddMaterialEntry = () => {
     new Date()
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const router = useRouter();
 
   const statuses = ["Pending", "Shipped", "Delivered"];
 
@@ -110,14 +112,13 @@ const AddMaterialEntry = () => {
           },
         }
       );
-
-      if (response.status === 200) {
-        console.log("Material entry saved successfully!");
+      if (response.status === 201) {
+        router.replace("/materials");
       } else {
-        console.error("Error saving material entry:", response.statusText);
+        alert("Error saving material: Try again later");
       }
     } catch (error) {
-      console.error("Error saving material entry:", error);
+      alert("Error saving material: Try again later");
     }
   };
 

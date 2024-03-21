@@ -24,6 +24,7 @@ const getAll = async (req, res) => {
     }
 
     const materialEntries = await MaterialEntry.find(query)
+      .sort({ createdAt: "desc" })
       .skip(skip)
       .limit(11);
 
