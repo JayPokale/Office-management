@@ -52,18 +52,13 @@ const AddMaterialEntry = () => {
   const [fault, setFault] = useState("");
   const [offlinePhoto, setOfflinePhoto] = useState("");
   const [photo, setPhoto] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
-  );
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const router = useRouter();
 
   const statuses = ["Pending", "Shipped", "Delivered"];
 
-  const handleDateChange = (
-    event: DateTimePickerEvent,
-    date?: Date | undefined
-  ) => {
+  const handleDateChange = (_: DateTimePickerEvent, date?: Date) => {
     setSelectedDate(date || new Date());
     setShowDatePicker(false);
   };

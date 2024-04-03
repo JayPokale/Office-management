@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -36,7 +36,7 @@ const MaterialEntryDetails = () => {
     const response = await axios.get(
       `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`
     );
-    console.log(response);
+
     setEntry(response.data);
   };
 
@@ -100,7 +100,12 @@ const MaterialEntryDetails = () => {
           <View style={styles.imageContainer}>
             <Image source={{ uri: entry.photo }} style={styles.image} />
           </View>
-          <TouchableOpacity style={styles.editButton} onPress={() => {}}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => {
+              router.push({ pathname: `/material/edit/${id}` });
+            }}
+          >
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
         </>

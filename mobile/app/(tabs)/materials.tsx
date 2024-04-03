@@ -43,7 +43,6 @@ const MaterialEntryList: React.FC<{}> = () => {
       const response = await fetchData(entries.length);
       setEntries((prev) => [...prev, ...response.data.entries]);
       setHasMore(response.data.hasMoreEntries);
-      console.log(response.data);
     } catch (error) {
       console.error(error);
     }

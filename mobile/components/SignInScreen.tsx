@@ -29,7 +29,7 @@ export default function SignInScreen() {
       });
       await setActive({ session: completeSignIn.createdSessionId });
     } catch (err: any) {
-      console.log(err);
+      console.error(err);
     }
   };
 
