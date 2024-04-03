@@ -1,28 +1,26 @@
 const mongoose = require("mongoose");
 
-const PurchaseDetailsSchema = new mongoose.Schema(
+const ServiceEntrySchema = new mongoose.Schema(
   {
     userId: { type: String, required: true },
     date: { type: Date, required: true },
     customerName: { type: String, required: true },
+    customerDetails: { type: String, required: true },
     companyDetails: { type: String },
     companyName: { type: String },
     productDetails: { type: String, required: true },
-    materialUsed: { type: String, required: true },
-    chalanNumber: { type: String, required: true },
-    cost: { type: Number, default: 0 },
+    materialUsed: { type: String },
+    quotation: { type: String, required: true },
     status: {
       type: String,
-      enum: ["Pending", "Paid"],
+      enum: ["Pending", "Delivered"],
       default: "Pending",
     },
+    fault: { type: String },
   },
   { timestamps: true }
 );
 
-const PurchaseDetails = mongoose.model(
-  "PurchaseDetails",
-  PurchaseDetailsSchema
-);
+const ServiceEntry = mongoose.model("ServiceEntry", ServiceEntrySchema);
 
-module.exports = PurchaseDetails;
+module.exports = ServiceEntry;

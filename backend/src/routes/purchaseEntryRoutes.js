@@ -6,7 +6,7 @@ const {
   getById,
   update,
   remove,
-} = require("../controllers/purchaseDetailsController");
+} = require("../controllers/purchaseEntryController");
 
 router.post("/", create);
 router.get("/", getAll);

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const PaymentDetailsSchema = new mongoose.Schema(
+const PaymentEntrySchema = new mongoose.Schema(
   {
     userId: { type: String, required: true },
     date: { type: Date, required: true },
@@ -8,7 +8,7 @@ const PaymentDetailsSchema = new mongoose.Schema(
     customerDetails: { type: String, required: true },
     billNo: { type: String, required: true },
     quotationDetails: { type: String, default: true },
-    companyDetails: { type: String},
+    companyDetails: { type: String },
     companyName: { type: String },
     amountRemaining: { type: Number, default: 0 },
     status: {
@@ -20,6 +20,6 @@ const PaymentDetailsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const PaymentDetails = mongoose.model("PaymentDetails", PaymentDetailsSchema);
+const PaymentEntry = mongoose.model("PaymentEntry", PaymentEntrySchema);
 
-module.exports = PaymentDetails;
+module.exports = PaymentEntry;

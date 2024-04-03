@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const materialEntryRoutes = require("./routes/materialEntryRoutes");
-const paymentDetailsRoutes = require("./routes/paymentDetailsRoutes");
-const purchaseDetailsRoutes = require("./routes/purchaseDetailsRoutes");
-const serviceDetailsRoutes = require("./routes/serviceDetailsRoutes");
+const PaymentEntryRoutes = require("./routes/paymentEntryRoutes");
+const PurchaseEntryRoutes = require("./routes/purchaseEntryRoutes");
+const ServiceEntryRoutes = require("./routes/serviceEntryRoutes");
 
 router.use("/material-entry", materialEntryRoutes);
-router.use("/payment-details", paymentDetailsRoutes);
-router.use("/purchase-details", purchaseDetailsRoutes);
-router.use("/service-details", serviceDetailsRoutes);
+router.use("/payment-entry", PaymentEntryRoutes);
+router.use("/purchase-entry", PurchaseEntryRoutes);
+router.use("/service-entry", ServiceEntryRoutes);
 
 module.exports = router;

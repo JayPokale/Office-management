@@ -6,7 +6,7 @@ const {
   getById,
   update,
   remove,
-} = require("../controllers/serviceDetailsController");
+} = require("../controllers/serviceEntryController");
 
 router.post("/", create);
 router.get("/", getAll);

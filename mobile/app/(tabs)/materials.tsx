@@ -33,16 +33,24 @@ const MaterialEntryList: React.FC<{}> = () => {
   const [hasMore, setHasMore] = useState<boolean>(false);
 
   const fetchData = async (skip: number = 0) => {
-    return await axios.get(
-      `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry?skip=${skip}`
-    );
+    try {
+      const response = await axios.get(
+        `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry?skip=${skip}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return { entries: [], hasMoreEntries: false };
+    }
   };
-  
+
   const fetchEntries = async () => {
     try {
-      const response = await fetchData(entries.length);
-      setEntries((prev) => [...prev, ...response.data.entries]);
-      setHasMore(response.data.hasMoreEntries);
+      const { entries: newEntries, hasMoreEntries } = await fetchData(
+        entries.length
+      );
+      setEntries((prevEntries) => [...prevEntries, ...newEntries]);
+      setHasMore(hasMoreEntries);
     } catch (error) {
       console.error(error);
     }
