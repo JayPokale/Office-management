@@ -1,7 +1,7 @@
 import SignInScreen from "@/components/SignInScreen";
 import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
 import { Redirect } from "expo-router";
-import { SafeAreaView, Text, StyleSheet } from "react-native";
+import { SafeAreaView} from "react-native";
 
 const Home = () => {
   return <Redirect href={"/materials"} />;

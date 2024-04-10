@@ -5,8 +5,8 @@ const compression = require("compression");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config");
-// const checkAuth = require("./middlewares/checkAuth");
 const routes = require("./routes");
+// const { ClerkExpressWithAuth } = require("@clerk/clerk-sdk-node");
 
 const app = express();
 
@@ -21,13 +21,9 @@ app.use(
     max: 100,
   })
 );
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).send("Something went wrong!");
-});
 
 connectDB();
-// app.use("/api/v0", checkAuth);
+// app.use("/api/v0", ClerkExpressWithAuth(), routes);
 app.use("/api/v0", routes);
 
 const port = process.env.PORT || 3000;

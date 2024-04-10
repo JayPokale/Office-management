@@ -169,7 +169,7 @@ const AddPaymentEntry = () => {
           onChange={handleDateChange}
         />
       )}
-      {/* <TouchableOpacity
+      <TouchableOpacity
         onPress={pickPhotoAndUpload}
         style={styles.uploadButton}
       >
@@ -178,7 +178,7 @@ const AddPaymentEntry = () => {
         ) : (
           <Text style={styles.uploadButtonText}>Upload Photo</Text>
         )}
-      </TouchableOpacity> */}
+      </TouchableOpacity>
       <View style={styles.radioContainerWrapper}>
         {statuses.map((statusText: string) => (
           <TouchableOpacity
