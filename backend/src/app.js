@@ -6,7 +6,7 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config");
 const routes = require("./routes");
-// const { ClerkExpressWithAuth } = require("@clerk/clerk-sdk-node");
+const { ClerkExpressWithAuth } = require("@clerk/clerk-sdk-node");
 
 const app = express();
 
@@ -23,10 +23,9 @@ app.use(
 );
 
 connectDB();
-// app.use("/api/v0", ClerkExpressWithAuth(), routes);
-app.use("/api/v0", routes);
+app.use("/api/v0", ClerkExpressWithAuth(), routes);
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on PORT ${PORT}`);
 });
