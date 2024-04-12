@@ -4,7 +4,9 @@ import { Image, Text, View } from "react-native";
 const Title = () => {
   return (
     <View>
-      <Text style={{fontSize: 18, fontWeight: "bold"}}>SHRI SAI CONTROLS</Text>
+      <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+        SHRI SAI CONTROLS
+      </Text>
       {/* <Image style={{ width: 50, height: 50 }} /> */}
     </View>
   );

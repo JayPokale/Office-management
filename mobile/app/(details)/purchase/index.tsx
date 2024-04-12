@@ -16,6 +16,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 
 interface InputProps {
   placeholder: string;
@@ -48,11 +49,13 @@ const AddPurchaseEntry = () => {
   const [chalanNumber, setChalanNumber] = useState("");
   const [cost, setCost] = useState("");
   const [status, setStatus] = useState<string>("Pending");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [offlinePhoto, setOfflinePhoto] = useState("");
   const [photo, setPhoto] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { getToken, userId } = useAuth();
 
   const statuses = ["Pending", "Paid"];
 
@@ -71,35 +74,41 @@ const AddPurchaseEntry = () => {
     });
 
     if (!result.canceled) {
+      setIsLoading(true);
       const { uri } = result.assets[0];
       setOfflinePhoto(uri);
       const secureURI = await uploadImage(uri);
       setPhoto(secureURI);
+      setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
+    if (isLoading) return;
+
     const data = {
-      userId: "123",
+      userId,
       customerName,
       companyName,
       companyDetails,
       productDetails,
       materialUsed,
       chalanNumber,
-      cost: parseFloat(cost),
+      cost,
       status,
       photo,
       date: selectedDate,
     };
 
     try {
+      const token = await getToken();
       const response = await axios.post(
         `${process.env.EXPO_PUBLIC_BACKEND_URI}/purchase-entry`,
         data,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -130,7 +139,6 @@ const AddPurchaseEntry = () => {
         placeholder="Company Details"
         value={companyDetails}
         onChangeText={setCompanyDetails}
-        multiline
       />
       <InputField
         placeholder="Product Details"
@@ -148,7 +156,11 @@ const AddPurchaseEntry = () => {
         value={chalanNumber}
         onChangeText={setChalanNumber}
       />
-      <InputField placeholder="Cost" value={cost} onChangeText={setCost} />
+      <InputField
+        placeholder="Cost"
+        value={cost}
+        onChangeText={(text) => setCost(text)}
+      />
       <TouchableOpacity
         onPress={() => setShowDatePicker(true)}
         style={styles.datePickerButton}
@@ -168,6 +180,7 @@ const AddPurchaseEntry = () => {
       <TouchableOpacity
         onPress={pickPhotoAndUpload}
         style={styles.uploadButton}
+        disabled={isLoading}
       >
         {offlinePhoto ? (
           <Image source={{ uri: offlinePhoto }} style={styles.uploadPhoto} />
@@ -192,7 +205,7 @@ const AddPurchaseEntry = () => {
           </TouchableOpacity>
         ))}
       </View>
-      <Button title="Save" onPress={handleSave} />
+      <Button title="Save" onPress={handleSave} disabled={isLoading} />
     </ScrollView>
   );
 };

@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
@@ -5,6 +6,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -14,22 +16,30 @@ interface PaymentEntry {
   userId: string;
   date: string;
   customerName: string;
-  customerDetails: string;
+  companyName: string;
+  companyDetails: string;
   billNo: string;
   quotationDetails: string;
-  companyDetails?: string;
-  companyName?: string;
   amountRemaining: number;
   status: "Pending" | "Paid";
+  photo: string;
 }
 
 const PaymentEntryDetails = () => {
   const { id } = useLocalSearchParams();
   const [entry, setEntry] = useState<PaymentEntry | null>(null);
+  const { getToken } = useAuth();
 
   const fetchData = async () => {
+    const token = await getToken();
     const response = await axios.get(
-      `${process.env.EXPO_PUBLIC_BACKEND_URI}/payment-entry/${id}`
+      `${process.env.EXPO_PUBLIC_BACKEND_URI}/payment-entry/${id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
 
     setEntry(response.data);
@@ -41,6 +51,28 @@ const PaymentEntryDetails = () => {
 
   const formatDate = (dateString: string) => {
     return dateString.split("T")[0].split("-").reverse().join("-");
+  };
+
+  const handleDelete = async () => {
+    const shouldDelete = confirm("Are you sure you want to delete this entry?");
+
+    if (shouldDelete) {
+      try {
+        const token = await getToken();
+        await axios.delete(
+          `${process.env.EXPO_PUBLIC_BACKEND_URI}/payment-entry/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        router.replace("/payments");
+      } catch (error) {
+        alert("Failed to delete payment entry.");
+      }
+    }
   };
 
   return (
@@ -65,10 +97,6 @@ const PaymentEntryDetails = () => {
             <Text style={styles.detailText}>{entry.customerName}</Text>
           </View>
           <View style={styles.details}>
-            <Text style={styles.detailLabel}>Customer Details:</Text>
-            <Text style={styles.detailText}>{entry.customerDetails}</Text>
-          </View>
-          <View style={styles.details}>
             <Text style={styles.detailLabel}>Company Name:</Text>
             <Text style={styles.detailText}>{entry.companyName}</Text>
           </View>
@@ -84,6 +112,9 @@ const PaymentEntryDetails = () => {
             <Text style={styles.detailLabel}>Amount Remaining:</Text>
             <Text style={styles.detailText}>{entry.amountRemaining}</Text>
           </View>
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: entry.photo }} style={styles.image} />
+          </View>
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => {
@@ -91,6 +122,9 @@ const PaymentEntryDetails = () => {
             }}
           >
             <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </>
       ) : (
@@ -121,6 +155,14 @@ const styles = StyleSheet.create({
   detailText: {
     flex: 1,
   },
+  imageContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    aspectRatio: 3 / 4,
+  },
   editButton: {
     backgroundColor: "#007bff",
     paddingHorizontal: 20,
@@ -130,6 +172,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   editButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  deleteButtonText: {
     color: "#fff",
     fontSize: 16,
   },

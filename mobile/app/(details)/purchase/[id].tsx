@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
@@ -5,6 +6,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -14,22 +16,31 @@ interface PurchaseEntry {
   userId: string;
   date: string;
   customerName: string;
-  companyName?: string;
-  companyDetails?: string;
+  companyName: string;
+  companyDetails: string;
   productDetails: string;
   materialUsed: string;
   chalanNumber: string;
   cost: number;
   status: "Pending" | "Paid";
+  photo: string;
 }
 
 const PurchaseEntryDetails = () => {
   const { id } = useLocalSearchParams();
   const [entry, setEntry] = useState<PurchaseEntry | null>(null);
+  const { getToken } = useAuth();
 
   const fetchData = async () => {
+    const token = await getToken();
     const response = await axios.get(
-      `${process.env.EXPO_PUBLIC_BACKEND_URI}/purchase-entry/${id}`
+      `${process.env.EXPO_PUBLIC_BACKEND_URI}/purchase-entry/${id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
 
     setEntry(response.data);
@@ -41,6 +52,28 @@ const PurchaseEntryDetails = () => {
 
   const formatDate = (dateString: string) => {
     return dateString.split("T")[0].split("-").reverse().join("-");
+  };
+
+  const handleDelete = async () => {
+    const shouldDelete = confirm("Are you sure you want to delete this entry?");
+
+    if (shouldDelete) {
+      try {
+        const token = await getToken();
+        await axios.delete(
+          `${process.env.EXPO_PUBLIC_BACKEND_URI}/purchase-entry/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        router.replace("/purchases");
+      } catch (error) {
+        alert("Failed to delete purchase entry.");
+      }
+    }
   };
 
   return (
@@ -84,6 +117,9 @@ const PurchaseEntryDetails = () => {
             <Text style={styles.detailLabel}>Cost:</Text>
             <Text style={styles.detailText}>{entry.cost}</Text>
           </View>
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: entry.photo }} style={styles.image} />
+          </View>
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => {
@@ -91,6 +127,9 @@ const PurchaseEntryDetails = () => {
             }}
           >
             <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </>
       ) : (
@@ -121,6 +160,14 @@ const styles = StyleSheet.create({
   detailText: {
     flex: 1,
   },
+  imageContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    aspectRatio: 3 / 4,
+  },
   editButton: {
     backgroundColor: "#007bff",
     paddingHorizontal: 20,
@@ -130,6 +177,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   editButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  deleteButtonText: {
     color: "#fff",
     fontSize: 16,
   },

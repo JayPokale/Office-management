@@ -16,6 +16,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 
 interface InputProps {
   placeholder: string;
@@ -72,15 +73,24 @@ const EditMaterialEntry = () => {
   const [photo, setPhoto] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { getToken, userId } = useAuth();
 
   const statuses = ["Pending", "Shipped", "Delivered"];
 
   useEffect(() => {
     const fetchData = async () => {
+      const token = await getToken();
       try {
         const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`
+          `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         setEntry(response.data);
         setCustomerName(response.data.customerName);
@@ -119,16 +129,20 @@ const EditMaterialEntry = () => {
     });
 
     if (!result.canceled) {
+      setIsLoading(true);
       const { uri } = result.assets[0];
       setOfflinePhoto(uri);
       const secureURI = await uploadImage(uri);
       setPhoto(secureURI);
+      setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
+    if (isLoading) return;
+
     const data = {
-      userId: "123",
+      userId,
       customerName,
       companyName,
       productDetails,
@@ -144,12 +158,14 @@ const EditMaterialEntry = () => {
     };
 
     try {
+      const token = await getToken();
       const response = await axios.put(
         `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`,
         data,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -265,7 +281,7 @@ const EditMaterialEntry = () => {
               </TouchableOpacity>
             ))}
           </View>
-          <Button title="Save" onPress={handleSave} />
+          <Button title="Save" onPress={handleSave} disabled={isLoading} />
         </>
       )}
     </ScrollView>

@@ -16,6 +16,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 
 interface InputProps {
   placeholder: string;
@@ -41,7 +42,6 @@ const InputField: React.FC<InputProps> = ({
 
 const AddServiceEntry = () => {
   const [customerName, setCustomerName] = useState("");
-  const [customerDetails, setCustomerDetails] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [companyDetails, setCompanyDetails] = useState("");
   const [productDetails, setProductDetails] = useState("");
@@ -49,11 +49,13 @@ const AddServiceEntry = () => {
   const [quotation, setQuotation] = useState("");
   const [status, setStatus] = useState<string>("Pending");
   const [fault, setFault] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [offlinePhoto, setOfflinePhoto] = useState("");
   const [photo, setPhoto] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { getToken, userId } = useAuth();
 
   const statuses = ["Pending", "Delivered"];
 
@@ -72,18 +74,21 @@ const AddServiceEntry = () => {
     });
 
     if (!result.canceled) {
+      setIsLoading(true);
       const { uri } = result.assets[0];
       setOfflinePhoto(uri);
       const secureURI = await uploadImage(uri);
       setPhoto(secureURI);
+      setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
+    if (isLoading) return;
+
     const data = {
-      userId: "123",
+      userId,
       customerName,
-      customerDetails,
       companyName,
       companyDetails,
       productDetails,
@@ -96,12 +101,14 @@ const AddServiceEntry = () => {
     };
 
     try {
+      const token = await getToken();
       const response = await axios.post(
         `${process.env.EXPO_PUBLIC_BACKEND_URI}/service-entry`,
         data,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -124,12 +131,6 @@ const AddServiceEntry = () => {
         onChangeText={setCustomerName}
       />
       <InputField
-        placeholder="Customer Details"
-        value={customerDetails}
-        onChangeText={setCustomerDetails}
-        multiline
-      />
-      <InputField
         placeholder="Company Name"
         value={companyName}
         onChangeText={setCompanyName}
@@ -138,7 +139,6 @@ const AddServiceEntry = () => {
         placeholder="Company Details"
         value={companyDetails}
         onChangeText={setCompanyDetails}
-        multiline
       />
       <InputField
         placeholder="Product Details"
@@ -182,6 +182,7 @@ const AddServiceEntry = () => {
       <TouchableOpacity
         onPress={pickPhotoAndUpload}
         style={styles.uploadButton}
+        disabled={isLoading}
       >
         {offlinePhoto ? (
           <Image source={{ uri: offlinePhoto }} style={styles.uploadPhoto} />
@@ -206,7 +207,7 @@ const AddServiceEntry = () => {
           </TouchableOpacity>
         ))}
       </View>
-      <Button title="Save" onPress={handleSave} />
+      <Button title="Save" onPress={handleSave} disabled={isLoading} />
     </ScrollView>
   );
 };

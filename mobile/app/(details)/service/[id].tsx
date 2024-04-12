@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
@@ -5,6 +6,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -14,7 +16,6 @@ interface ServiceEntry {
   userId: string;
   date: string;
   customerName: string;
-  customerDetails: string;
   companyName?: string;
   companyDetails?: string;
   productDetails: string;
@@ -22,15 +23,24 @@ interface ServiceEntry {
   quotation: string;
   status: "Pending" | "Delivered";
   fault?: string;
+  photo: string;
 }
 
 const ServiceEntryDetails = () => {
   const { id } = useLocalSearchParams();
   const [entry, setEntry] = useState<ServiceEntry | null>(null);
+  const { getToken } = useAuth();
 
   const fetchData = async () => {
+    const token = await getToken();
     const response = await axios.get(
-      `${process.env.EXPO_PUBLIC_BACKEND_URI}/service-entry/${id}`
+      `${process.env.EXPO_PUBLIC_BACKEND_URI}/service-entry/${id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
 
     setEntry(response.data);
@@ -42,6 +52,28 @@ const ServiceEntryDetails = () => {
 
   const formatDate = (dateString: string) => {
     return dateString.split("T")[0].split("-").reverse().join("-");
+  };
+
+  const handleDelete = async () => {
+    const shouldDelete = confirm("Are you sure you want to delete this entry?");
+
+    if (shouldDelete) {
+      try {
+        const token = await getToken();
+        await axios.delete(
+          `${process.env.EXPO_PUBLIC_BACKEND_URI}/service-entry/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        router.replace("/services");
+      } catch (error) {
+        alert("Failed to delete service entry.");
+      }
+    }
   };
 
   return (
@@ -61,33 +93,40 @@ const ServiceEntryDetails = () => {
             <Text style={styles.detailLabel}>Customer Name:</Text>
             <Text style={styles.detailText}>{entry.customerName}</Text>
           </View>
-          <View style={styles.details}>
-            <Text style={styles.detailLabel}>Customer Details:</Text>
-            <Text style={styles.detailText}>{entry.customerDetails}</Text>
-          </View>
-          <View style={styles.details}>
-            <Text style={styles.detailLabel}>Company Name:</Text>
-            <Text style={styles.detailText}>{entry.companyName}</Text>
-          </View>
-          <View style={styles.details}>
-            <Text style={styles.detailLabel}>Company Details:</Text>
-            <Text style={styles.detailText}>{entry.companyDetails}</Text>
-          </View>
+          {entry.companyName && (
+            <View style={styles.details}>
+              <Text style={styles.detailLabel}>Company Name:</Text>
+              <Text style={styles.detailText}>{entry.companyName}</Text>
+            </View>
+          )}
+          {entry.companyDetails && (
+            <View style={styles.details}>
+              <Text style={styles.detailLabel}>Company Details:</Text>
+              <Text style={styles.detailText}>{entry.companyDetails}</Text>
+            </View>
+          )}
           <View style={styles.details}>
             <Text style={styles.detailLabel}>Product Details:</Text>
             <Text style={styles.detailText}>{entry.productDetails}</Text>
           </View>
-          <View style={styles.details}>
-            <Text style={styles.detailLabel}>Material Used:</Text>
-            <Text style={styles.detailText}>{entry.materialUsed}</Text>
-          </View>
+          {entry.materialUsed && (
+            <View style={styles.details}>
+              <Text style={styles.detailLabel}>Material Used:</Text>
+              <Text style={styles.detailText}>{entry.materialUsed}</Text>
+            </View>
+          )}
           <View style={styles.details}>
             <Text style={styles.detailLabel}>Quotation:</Text>
             <Text style={styles.detailText}>{entry.quotation}</Text>
           </View>
-          <View style={styles.details}>
-            <Text style={styles.detailLabel}>Fault:</Text>
-            <Text style={styles.detailText}>{entry.fault}</Text>
+          {entry.fault && (
+            <View style={styles.details}>
+              <Text style={styles.detailLabel}>Fault:</Text>
+              <Text style={styles.detailText}>{entry.fault}</Text>
+            </View>
+          )}
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: entry.photo }} style={styles.image} />
           </View>
           <TouchableOpacity
             style={styles.editButton}
@@ -96,6 +135,9 @@ const ServiceEntryDetails = () => {
             }}
           >
             <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </>
       ) : (
@@ -126,6 +168,14 @@ const styles = StyleSheet.create({
   detailText: {
     flex: 1,
   },
+  imageContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    aspectRatio: 3 / 4,
+  },
   editButton: {
     backgroundColor: "#007bff",
     paddingHorizontal: 20,
@@ -135,6 +185,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   editButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  deleteButtonText: {
     color: "#fff",
     fontSize: 16,
   },

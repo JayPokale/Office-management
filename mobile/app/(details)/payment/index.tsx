@@ -16,6 +16,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 
 interface InputProps {
   placeholder: string;
@@ -41,18 +42,19 @@ const InputField: React.FC<InputProps> = ({
 
 const AddPaymentEntry = () => {
   const [customerName, setCustomerName] = useState("");
-  const [customerDetails, setCustomerDetails] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [companyDetails, setCompanyDetails] = useState("");
   const [billNo, setBillNo] = useState("");
   const [quotationDetails, setQuotationDetails] = useState("");
-  const [companyDetails, setCompanyDetails] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [amountRemaining, setAmountRemaining] = useState("");
   const [status, setStatus] = useState<string>("Pending");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [offlinePhoto, setOfflinePhoto] = useState("");
   const [photo, setPhoto] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { getToken, userId } = useAuth();
 
   const statuses = ["Pending", "Paid"];
 
@@ -71,35 +73,40 @@ const AddPaymentEntry = () => {
     });
 
     if (!result.canceled) {
+      setIsLoading(true);
       const { uri } = result.assets[0];
       setOfflinePhoto(uri);
       const secureURI = await uploadImage(uri);
       setPhoto(secureURI);
+      setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
+    if (isLoading) return;
+
     const data = {
-      userId: "123",
+      userId,
       customerName,
-      customerDetails,
+      companyName,
+      companyDetails,
       billNo,
       quotationDetails,
-      companyDetails,
-      companyName,
-      amountRemaining: parseInt(amountRemaining),
+      amountRemaining,
       status,
       photo,
       date: selectedDate,
     };
 
     try {
+      const token = await getToken();
       const response = await axios.post(
         `${process.env.EXPO_PUBLIC_BACKEND_URI}/payment-entry`,
         data,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -122,12 +129,17 @@ const AddPaymentEntry = () => {
         onChangeText={setCustomerName}
       />
       <InputField
-        placeholder="Customer Details"
-        value={customerDetails}
-        onChangeText={setCustomerDetails}
+        placeholder="Company Name"
+        value={companyName}
+        onChangeText={setCompanyName}
       />
       <InputField
-        placeholder="Bill Number"
+        placeholder="Company Details"
+        value={companyDetails}
+        onChangeText={setCompanyDetails}
+      />
+      <InputField
+        placeholder="Bill No"
         value={billNo}
         onChangeText={setBillNo}
       />
@@ -135,23 +147,11 @@ const AddPaymentEntry = () => {
         placeholder="Quotation Details"
         value={quotationDetails}
         onChangeText={setQuotationDetails}
-        multiline
-      />
-      <InputField
-        placeholder="Company Details"
-        value={companyDetails}
-        onChangeText={setCompanyDetails}
-        multiline
-      />
-      <InputField
-        placeholder="Company Name"
-        value={companyName}
-        onChangeText={setCompanyName}
       />
       <InputField
         placeholder="Amount Remaining"
         value={amountRemaining}
-        onChangeText={setAmountRemaining}
+        onChangeText={(text) => setAmountRemaining(text)}
       />
       <TouchableOpacity
         onPress={() => setShowDatePicker(true)}
@@ -172,6 +172,7 @@ const AddPaymentEntry = () => {
       <TouchableOpacity
         onPress={pickPhotoAndUpload}
         style={styles.uploadButton}
+        disabled={isLoading}
       >
         {offlinePhoto ? (
           <Image source={{ uri: offlinePhoto }} style={styles.uploadPhoto} />
@@ -196,7 +197,7 @@ const AddPaymentEntry = () => {
           </TouchableOpacity>
         ))}
       </View>
-      <Button title="Save" onPress={handleSave} />
+      <Button title="Save" onPress={handleSave} disabled={isLoading} />
     </ScrollView>
   );
 };

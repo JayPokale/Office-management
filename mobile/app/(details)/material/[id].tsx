@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
@@ -6,7 +7,6 @@ import {
   Text,
   StyleSheet,
   Image,
-  Dimensions,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -31,10 +31,18 @@ interface MaterialEntry {
 const MaterialEntryDetails = () => {
   const { id } = useLocalSearchParams();
   const [entry, setEntry] = useState<MaterialEntry | null>(null);
+  const { getToken } = useAuth();
 
   const fetchData = async () => {
+    const token = await getToken();
     const response = await axios.get(
-      `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`
+      `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
 
     setEntry(response.data);
@@ -46,6 +54,28 @@ const MaterialEntryDetails = () => {
 
   const formatDate = (dateString: string) => {
     return dateString.split("T")[0].split("-").reverse().join("-");
+  };
+
+  const handleDelete = async () => {
+    const shouldDelete = confirm("Are you sure you want to delete this entry?");
+
+    if (shouldDelete) {
+      try {
+        const token = await getToken();
+        await axios.delete(
+          `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        router.replace("/materials");
+      } catch (error) {
+        alert("Failed to delete material entry.");
+      }
+    }
   };
 
   return (
@@ -108,6 +138,9 @@ const MaterialEntryDetails = () => {
           >
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
         </>
       ) : (
         <Text>Loading details...</Text>
@@ -115,8 +148,6 @@ const MaterialEntryDetails = () => {
     </ScrollView>
   );
 };
-
-var width = Dimensions.get("window").width;
 
 const styles = StyleSheet.create({
   container: {
@@ -156,6 +187,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   editButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  deleteButtonText: {
     color: "#fff",
     fontSize: 16,
   },
