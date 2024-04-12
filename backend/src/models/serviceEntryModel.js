@@ -5,9 +5,8 @@ const ServiceEntrySchema = new mongoose.Schema(
     userId: { type: String, required: true },
     date: { type: Date, required: true },
     customerName: { type: String, required: true },
-    customerDetails: { type: String, required: true },
-    companyDetails: { type: String },
     companyName: { type: String },
+    companyDetails: { type: String },
     productDetails: { type: String, required: true },
     materialUsed: { type: String },
     quotation: { type: String, required: true },
@@ -17,6 +16,7 @@ const ServiceEntrySchema = new mongoose.Schema(
       default: "Pending",
     },
     fault: { type: String },
+    photo: { type: String },
   },
   { timestamps: true }
 );

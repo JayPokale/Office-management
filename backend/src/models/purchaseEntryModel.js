@@ -5,8 +5,8 @@ const PurchaseEntrySchema = new mongoose.Schema(
     userId: { type: String, required: true },
     date: { type: Date, required: true },
     customerName: { type: String, required: true },
-    companyDetails: { type: String },
-    companyName: { type: String },
+    companyName: { type: String, required: true },
+    companyDetails: { type: String, required: true },
     productDetails: { type: String, required: true },
     materialUsed: { type: String, required: true },
     chalanNumber: { type: String, required: true },
@@ -16,6 +16,7 @@ const PurchaseEntrySchema = new mongoose.Schema(
       enum: ["Pending", "Paid"],
       default: "Pending",
     },
+    photo: { type: String },
   },
   { timestamps: true }
 );
