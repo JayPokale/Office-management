@@ -54,24 +54,20 @@ const PaymentEntryDetails = () => {
   };
 
   const handleDelete = async () => {
-    const shouldDelete = confirm("Are you sure you want to delete this entry?");
-
-    if (shouldDelete) {
-      try {
-        const token = await getToken();
-        await axios.delete(
-          `${process.env.EXPO_PUBLIC_BACKEND_URI}/payment-entry/${id}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        router.replace("/payments");
-      } catch (error) {
-        alert("Failed to delete payment entry.");
-      }
+    try {
+      const token = await getToken();
+      await axios.delete(
+        `${process.env.EXPO_PUBLIC_BACKEND_URI}/payment-entry/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      router.replace("/payments");
+    } catch (error) {
+      alert("Failed to delete payment entry.");
     }
   };
 

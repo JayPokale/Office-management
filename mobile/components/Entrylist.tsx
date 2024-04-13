@@ -8,9 +8,9 @@ import {
   ScrollView,
 } from "react-native";
 import axios from "axios";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-// import { useAuth } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/clerk-expo";
 
 interface Entry {
   _id: string;
@@ -28,17 +28,17 @@ interface EntryListProps {
 const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(false);
-  // const { getToken } = useAuth();
+  const { getToken } = useAuth();
 
   const fetchData = async (skip: number = 0) => {
     try {
-      // const token = await getToken();
+      const token = await getToken();
       const response = await axios.get(
         `${process.env.EXPO_PUBLIC_BACKEND_URI}/${fetchEndpoint}?skip=${skip}`,
         {
           headers: {
             "Content-Type": "application/json",
-            // Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -84,6 +84,19 @@ const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
     }
   };
 
+  const logo = () => {
+    switch (entryType) {
+      case "material":
+        return "archive-outline";
+      case "payment":
+        return "cash-outline";
+      case "purchase":
+        return "cart-outline";
+      case "service":
+        return "construct-outline";
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return dateString.split("T")[0].split("-").reverse().join("-");
   };
@@ -91,36 +104,31 @@ const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={{ padding: 10 }}>
-        <Link href={`/${entryType}/`} style={styles.addButton}>
-          <Text
-            style={{ color: "#007bff", alignItems: "center", display: "flex" }}
-          >
-            <Ionicons name="archive-outline" size={24} color={"#007bff"} /> Add
-            {entryType}
-          </Text>
-        </Link>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({ pathname: `/${entryType}` as `${string}:${string}` })
+          }
+        >
+          <View style={styles.addButton}>
+            <Ionicons name={logo()} size={24} color={"#007bff"} />
+            <Text style={{ color: "#007bff" }}>Add {entryType}</Text>
+          </View>
+        </TouchableOpacity>
       </View>
       {entries.length > 0 ? (
-        entries.map((entry) => (
-          <View key={entry._id}>
+        entries.map((entry, i) => (
+          <View key={i}>
             <TouchableOpacity onPress={() => navigateToDetails(entry._id)}>
               <View style={styles.listItem}>
                 <View>
-                  <Text style={[styles.listItemText, { fontWeight: "bold" }]}>
+                  <Text style={{ fontSize: 16, fontWeight: "bold" }}>
                     {entry.customerName}
                   </Text>
-                  <Text style={styles.listItemText}>{entry.companyName}</Text>
+                  <Text>{entry.companyName}</Text>
                 </View>
                 <View style={styles.rightDetails}>
-                  <Text style={styles.listItemText}>
-                    {formatDate(entry.date)}
-                  </Text>
-                  <Text
-                    style={{
-                      ...styles.listItemText,
-                      color: getStatusColor(entry.status),
-                    }}
-                  >
+                  <Text style={{ fontSize: 16 }}>{formatDate(entry.date)}</Text>
+                  <Text style={{ color: getStatusColor(entry.status) }}>
                     {entry.status}
                   </Text>
                 </View>
@@ -138,9 +146,10 @@ const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
 
 const styles = StyleSheet.create({
   addButton: {
-    display: "flex",
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    gap: 5,
     padding: 10,
     backgroundColor: "#e0ffff",
     borderStyle: "dashed",

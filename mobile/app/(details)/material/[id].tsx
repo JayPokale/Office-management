@@ -57,24 +57,20 @@ const MaterialEntryDetails = () => {
   };
 
   const handleDelete = async () => {
-    const shouldDelete = confirm("Are you sure you want to delete this entry?");
-
-    if (shouldDelete) {
-      try {
-        const token = await getToken();
-        await axios.delete(
-          `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        router.replace("/materials");
-      } catch (error) {
-        alert("Failed to delete material entry.");
-      }
+    try {
+      const token = await getToken();
+      await axios.delete(
+        `${process.env.EXPO_PUBLIC_BACKEND_URI}/material-entry/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      router.replace("/materials");
+    } catch (error) {
+      alert("Failed to delete material entry.");
     }
   };
 

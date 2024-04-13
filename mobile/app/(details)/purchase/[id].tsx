@@ -55,24 +55,20 @@ const PurchaseEntryDetails = () => {
   };
 
   const handleDelete = async () => {
-    const shouldDelete = confirm("Are you sure you want to delete this entry?");
-
-    if (shouldDelete) {
-      try {
-        const token = await getToken();
-        await axios.delete(
-          `${process.env.EXPO_PUBLIC_BACKEND_URI}/purchase-entry/${id}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        router.replace("/purchases");
-      } catch (error) {
-        alert("Failed to delete purchase entry.");
-      }
+    try {
+      const token = await getToken();
+      await axios.delete(
+        `${process.env.EXPO_PUBLIC_BACKEND_URI}/purchase-entry/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      router.replace("/purchases");
+    } catch (error) {
+      alert("Failed to delete purchase entry.");
     }
   };
 

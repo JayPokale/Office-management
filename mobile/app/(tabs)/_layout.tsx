@@ -18,6 +18,7 @@ const _layout = () => {
       <Tabs.Screen
         name="materials"
         options={{
+          title: "Materials",
           tabBarIcon: ({ color }) => (
             <Ionicons name="archive-outline" size={24} color={color} />
           ),
@@ -26,6 +27,7 @@ const _layout = () => {
       <Tabs.Screen
         name="payments"
         options={{
+          title: "Payments",
           tabBarIcon: ({ color }) => (
             <Ionicons name="cash-outline" size={24} color={color} />
           ),
@@ -34,6 +36,7 @@ const _layout = () => {
       <Tabs.Screen
         name="purchases"
         options={{
+          title: "Purchases",
           tabBarIcon: ({ color }) => (
             <Ionicons name="cart-outline" size={24} color={color} />
           ),
@@ -42,6 +45,7 @@ const _layout = () => {
       <Tabs.Screen
         name="services"
         options={{
+          title: "Services",
           tabBarIcon: ({ color }) => (
             <Ionicons name="construct-outline" size={24} color={color} />
           ),
