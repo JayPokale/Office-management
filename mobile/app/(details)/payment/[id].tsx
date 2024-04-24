@@ -1,7 +1,8 @@
+import { LoaderContext } from "@/app/_layout";
 import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -28,9 +29,11 @@ interface PaymentEntry {
 const PaymentEntryDetails = () => {
   const { id } = useLocalSearchParams();
   const [entry, setEntry] = useState<PaymentEntry | null>(null);
+  const setLoaderState = useContext(LoaderContext);
   const { getToken } = useAuth();
 
   const fetchData = async () => {
+    setLoaderState(true);
     const token = await getToken();
     const response = await axios.get(
       `${process.env.EXPO_PUBLIC_BACKEND_URI}/payment-entry/${id}`,
@@ -41,8 +44,8 @@ const PaymentEntryDetails = () => {
         },
       }
     );
-
     setEntry(response.data);
+    setLoaderState(false);
   };
 
   useEffect(() => {
@@ -54,6 +57,7 @@ const PaymentEntryDetails = () => {
   };
 
   const handleDelete = async () => {
+    setLoaderState(true);
     try {
       const token = await getToken();
       await axios.delete(
@@ -69,12 +73,13 @@ const PaymentEntryDetails = () => {
     } catch (error) {
       alert("Failed to delete payment entry.");
     }
+    setLoaderState(false);
   };
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Payment Entry Details</Text>
-      {entry ? (
+      {entry && (
         <>
           <View style={styles.details}>
             <Text style={styles.detailLabel}>Date:</Text>
@@ -108,9 +113,11 @@ const PaymentEntryDetails = () => {
             <Text style={styles.detailLabel}>Amount Remaining:</Text>
             <Text style={styles.detailText}>{entry.amountRemaining}</Text>
           </View>
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: entry.photo }} style={styles.image} />
-          </View>
+          {entry.photo && (
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: entry.photo }} style={styles.image} />
+            </View>
+          )}
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => {
@@ -123,8 +130,6 @@ const PaymentEntryDetails = () => {
             <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </>
-      ) : (
-        <Text>Loading details...</Text>
       )}
     </ScrollView>
   );
@@ -133,7 +138,7 @@ const PaymentEntryDetails = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
     backgroundColor: "#fff",
   },
   title: {

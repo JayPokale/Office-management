@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import DateTimePicker, {
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
+import { LoaderContext } from "@/app/_layout";
 
 interface InputProps {
   placeholder: string;
@@ -52,8 +53,8 @@ const AddPaymentEntry = () => {
   const [photo, setPhoto] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const setLoaderState = useContext(LoaderContext);
   const { getToken, userId } = useAuth();
 
   const statuses = ["Pending", "Paid"];
@@ -73,18 +74,17 @@ const AddPaymentEntry = () => {
     });
 
     if (!result.canceled) {
-      setIsLoading(true);
+      setLoaderState(true);
       const { uri } = result.assets[0];
       setOfflinePhoto(uri);
       const secureURI = await uploadImage(uri);
       setPhoto(secureURI);
-      setIsLoading(false);
+      setLoaderState(false);
     }
   };
 
   const handleSave = async () => {
-    if (isLoading) return;
-
+    setLoaderState(true);
     const data = {
       userId,
       customerName,
@@ -118,6 +118,7 @@ const AddPaymentEntry = () => {
     } catch (error) {
       alert("Error saving payment: Try again later");
     }
+    setLoaderState(false);
   };
 
   return (
@@ -172,7 +173,6 @@ const AddPaymentEntry = () => {
       <TouchableOpacity
         onPress={pickPhotoAndUpload}
         style={styles.uploadButton}
-        disabled={isLoading}
       >
         {offlinePhoto ? (
           <Image source={{ uri: offlinePhoto }} style={styles.uploadPhoto} />
@@ -197,7 +197,7 @@ const AddPaymentEntry = () => {
           </TouchableOpacity>
         ))}
       </View>
-      <Button title="Save" onPress={handleSave} disabled={isLoading} />
+      <Button title="Save" onPress={handleSave} />
     </ScrollView>
   );
 };
@@ -205,7 +205,6 @@ const AddPaymentEntry = () => {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    marginVertical: 20,
   },
   title: {
     fontSize: 20,

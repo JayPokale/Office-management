@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import axios from "axios";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@clerk/clerk-expo";
+import { LoaderContext } from "@/app/_layout";
 
 interface Entry {
   _id: string;
@@ -28,6 +29,7 @@ interface EntryListProps {
 const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(false);
+  const setLoaderState = useContext(LoaderContext);
   const { getToken } = useAuth();
 
   const fetchData = async (skip: number = 0) => {
@@ -50,6 +52,7 @@ const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
   };
 
   const fetchEntries = async () => {
+    setLoaderState(true);
     try {
       const { entries: newEntries, hasMoreEntries } = await fetchData(
         entries.length
@@ -59,6 +62,7 @@ const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
     } catch (error) {
       console.error(error);
     }
+    setLoaderState(false);
   };
 
   useEffect(() => {
@@ -115,7 +119,7 @@ const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
           </View>
         </TouchableOpacity>
       </View>
-      {entries.length > 0 ? (
+      {entries.length > 0 &&
         entries.map((entry, i) => (
           <View key={i}>
             <TouchableOpacity onPress={() => navigateToDetails(entry._id)}>
@@ -135,10 +139,7 @@ const EntryList: React.FC<EntryListProps> = ({ entryType, fetchEndpoint }) => {
               </View>
             </TouchableOpacity>
           </View>
-        ))
-      ) : (
-        <Text>Loading entries...</Text>
-      )}
+        ))}
       {hasMore && <Button title="Load More" onPress={fetchEntries} />}
     </ScrollView>
   );

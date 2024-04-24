@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Text,
   TextInput,
@@ -11,17 +11,20 @@ import {
   Alert,
 } from "react-native";
 import { useSignIn } from "@clerk/clerk-expo";
+import { LoaderContext } from "@/app/_layout";
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
   const [emailAddress, setEmailAddress] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const setLoaderState = useContext(LoaderContext);
 
   const onSignInPress = async () => {
     if (!isLoaded) {
       return;
     }
 
+    setLoaderState(true);
     try {
       const completeSignIn = await signIn.create({
         identifier: emailAddress,
@@ -31,6 +34,7 @@ export default function SignInScreen() {
     } catch (err: any) {
       console.error(err);
     }
+    setLoaderState(false);
   };
 
   return (

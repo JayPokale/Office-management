@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import DateTimePicker, {
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
+import { LoaderContext } from "@/app/_layout";
 
 interface InputProps {
   placeholder: string;
@@ -71,10 +72,12 @@ const EditServiceEntry = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const setLoaderState = useContext(LoaderContext);
   const { getToken, userId } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoaderState(true);
       const token = await getToken();
       try {
         const response = await axios.get(
@@ -101,6 +104,7 @@ const EditServiceEntry = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
+      setLoaderState(false);
     };
 
     fetchData();
@@ -252,7 +256,6 @@ const EditServiceEntry = () => {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    marginVertical: 20,
   },
   title: {
     fontSize: 20,
